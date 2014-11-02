@@ -2,11 +2,17 @@ using UnityEngine;
 using System.Collections;
 
 public class EnemyCtrl : MonoBehaviour {
+    enum State {
+        Walking,
+        Chasing,
+        Attacking,
+        Died
+    };
 
     // Add State
     CharacterStatus status;
     CharacterAnimation charaAnimation;
-	CharacterMove characterMove;
+    CharacterMove characterMove;
     Transform attackTarget;
 
     // 待機時間は2秒とする
@@ -18,21 +24,20 @@ public class EnemyCtrl : MonoBehaviour {
     // 初期位置
     public Vector3 basePosition;
 
-    enum State {
-        Walking,
-        Attacking,
-        Died
-    };
-
+    // State
     State state     = State.Walking;
     State nextState = State.Walking;
 
+    public void SetAttackTarget(Transform target) {
+      attackTarget = target;
+    }
+
     // Use this for initialization
     void Start () {
-        // Add
+    // Status
         status = GetComponent<CharacterStatus>();
         charaAnimation = GetComponent<CharacterAnimation>();
-		characterMove  = GetComponent<CharacterMove>();
+        characterMove  = GetComponent<CharacterMove>();
 
         // AI
        basePosition = transform.position;
@@ -44,6 +49,9 @@ public class EnemyCtrl : MonoBehaviour {
         switch(state) {
             case State.Walking:
                 Walking();
+                break;
+            case State.Chasing:
+                Chasing();
                 break;
             case State.Attacking:
                 Attacking();
@@ -85,9 +93,24 @@ public class EnemyCtrl : MonoBehaviour {
                 SendMessage("SetDestination", destinationPosition);
             }
         }else{
-			if(characterMove.Arrived())
-				waitTime = Random.Range(waitBasetime, waitBasetime * 2.0f);
-		}
+            if(characterMove.Arrived())
+                waitTime = Random.Range(waitBasetime, waitBasetime * 2.0f);
+
+            if( attackTarget )
+                ChangeState(State.Chasing);
+        }
+    }
+
+    void ChasingStart(){
+        StateStartCommon();
+    }
+
+    void Chasing(){
+        // 移動先をプレイヤーに設定
+        SendMessage("SetDestination", attackTarget.position);
+        // 2m以内に近づいたら攻撃
+        if (Vector3.Distance(attackTarget.position, transform.position) <= 2.0f)
+            ChangeState(State.Attacking);
     }
 
     void AttackStart() {
@@ -103,8 +126,13 @@ public class EnemyCtrl : MonoBehaviour {
     }
 
     void Attacking() {
-        if (charaAnimation.IsAttacked())
+        if (charaAnimation.IsAttacked()) {
             ChangeState(State.Walking);
+            // 待機時間を再設定
+            waitTime = Random.Range(waitBasetime, waitBasetime * 2.0f);
+            // ターゲットリセット
+            attackTarget = null;
+        }
     }
 
     void Died() {
@@ -123,4 +151,5 @@ public class EnemyCtrl : MonoBehaviour {
         status.attacking = false;
         status.died = false;
     }
+
 }
