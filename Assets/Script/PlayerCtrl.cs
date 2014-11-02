@@ -12,6 +12,8 @@ public class PlayerCtrl : MonoBehaviour {
     Transform attackTarget;
     public float attackRange = 1.5f;
 
+	GameRuleCtrl gameRuleCtrl;
+
     enum State {
         Walking,
         Attacking,
@@ -28,6 +30,8 @@ public class PlayerCtrl : MonoBehaviour {
         // Add
         status = GetComponent<CharacterStatus>();
         charaAnimation = GetComponent<CharacterAnimation>();
+
+		gameRuleCtrl = FindObjectOfType<GameRuleCtrl>();
     }
 
     // Update is called once per frame
@@ -116,6 +120,7 @@ public class PlayerCtrl : MonoBehaviour {
 
     void Died() {
         status.died = true;
+		gameRuleCtrl.GameOver();
     }
 
     void Damage(AttackArea.AttackInfo attackInfo) {

@@ -28,6 +28,12 @@ public class EnemyCtrl : MonoBehaviour {
     State state     = State.Walking;
     State nextState = State.Walking;
 
+    // Item
+    public GameObject[] dropItemPrefab;
+
+	GameRuleCtrl gameRuleCtrl;
+
+    // Target設定
     public void SetAttackTarget(Transform target) {
       attackTarget = target;
     }
@@ -40,8 +46,10 @@ public class EnemyCtrl : MonoBehaviour {
         characterMove  = GetComponent<CharacterMove>();
 
         // AI
-       basePosition = transform.position;
-       waitTime     = waitBasetime;
+        basePosition = transform.position;
+        waitTime     = waitBasetime;
+
+		gameRuleCtrl = FindObjectOfType<GameRuleCtrl>();
     }
 
     // Update is called once per frame
@@ -77,6 +85,12 @@ public class EnemyCtrl : MonoBehaviour {
 
     void ChangeState(State nextState) {
         this.nextState = nextState;
+    }
+
+    void dropItem() {
+    if (dropItemPrefab.Length == 0) return;
+        GameObject dropItem = dropItemPrefab[Random.Range(0, dropItemPrefab.Length)];
+        Instantiate(dropItem, transform.position, Quaternion.identity);
     }
 
     void WalkStart(){
@@ -137,6 +151,10 @@ public class EnemyCtrl : MonoBehaviour {
 
     void Died() {
         status.died = true;
+        dropItem();
+		Destroy(gameObject);
+		if (gameObject.tag == "Boss")
+			gameRuleCtrl.GameClear();
     }
 
     void Damage(AttackArea.AttackInfo attackInfo) {

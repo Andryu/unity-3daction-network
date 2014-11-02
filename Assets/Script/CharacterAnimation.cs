@@ -14,15 +14,15 @@ public class CharacterAnimation : MonoBehaviour {
   }
 
   void StartAttackHit() {
-    Debug.Log ("StartAttackHit");
+    //Debug.Log ("StartAttackHit");
   }
 
   void EndAttackHit() {
-    Debug.Log ("EndAttackHit");
+    //Debug.Log ("EndAttackHit");
   }
 
   void EndAttack() {
-	attacked = true;
+  attacked = true;
   }
 
   // Use this for initialization

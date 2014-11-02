@@ -19,6 +19,9 @@ public class AttackArea : MonoBehaviour {
     AttackInfo attackInfo  = new AttackInfo();
     attackInfo.attackPower = status.Power;
 
+    if (status.powerBoost)
+        attackInfo.attackPower += attackInfo.attackPower;
+
     attackInfo.attacker = transform.root;
     return attackInfo;
   }
