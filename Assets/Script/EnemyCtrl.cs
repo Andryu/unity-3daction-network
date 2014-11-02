@@ -1,16 +1,22 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
-public class PlayerCtrl : MonoBehaviour {
-
-    const float RayCastMaxDistance = 100.0f;
-    InputManager inputManager;
+public class EnemyCtrl : MonoBehaviour {
 
     // Add State
     CharacterStatus status;
     CharacterAnimation charaAnimation;
+	CharacterMove characterMove;
     Transform attackTarget;
-    public float attackRange = 1.5f;
+
+    // 待機時間は2秒とする
+    public float waitBasetime = 2.0f;
+    // 残り待機時間
+    float waitTime;
+    // 移動範囲5メートル
+    public float walkRange = 1.5f;
+    // 初期位置
+    public Vector3 basePosition;
 
     enum State {
         Walking,
@@ -23,11 +29,14 @@ public class PlayerCtrl : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        inputManager = FindObjectOfType<InputManager>();
-
         // Add
         status = GetComponent<CharacterStatus>();
         charaAnimation = GetComponent<CharacterAnimation>();
+		characterMove  = GetComponent<CharacterMove>();
+
+        // AI
+       basePosition = transform.position;
+       waitTime     = waitBasetime;
     }
 
     // Update is called once per frame
@@ -41,9 +50,9 @@ public class PlayerCtrl : MonoBehaviour {
                 break;
         }
 
-        // stateの変更を行う
+        // state
         if (state != nextState) {
-			state  = nextState;
+            state  = nextState;
             switch(state) {
                 case State.Walking:
                     WalkStart();
@@ -67,34 +76,18 @@ public class PlayerCtrl : MonoBehaviour {
     }
 
     void Walking() {
-        if(inputManager.Clicked()) {
-            Vector2 clickpos = inputManager.GetCursorPosition();
-
-            // search RayCast target
-            Ray ray = Camera.main.ScreenPointToRay(clickpos);
-
-            RaycastHit hitInfo;
-            if(Physics.Raycast (ray, out hitInfo, RayCastMaxDistance, (1 << LayerMask.NameToLayer ("Ground")) 
-			   | (1<<LayerMask.NameToLayer("EnemyHit")))) {
-                SendMessage("SetDestination", hitInfo.point);
+        if (waitTime > 0.0f) {
+            waitTime -= Time.deltaTime;
+            if (waitTime <= 0.0f) {
+                Vector2 randomValue = Random.insideUnitCircle * walkRange;
+                Vector3 destinationPosition = basePosition + new Vector3(randomValue.x, 0.0f, randomValue.y);
+                // 目的地の指定
+                SendMessage("SetDestination", destinationPosition);
             }
-
-            // 敵がクリックされた
-            if (hitInfo.collider.gameObject.layer == LayerMask.NameToLayer("EnemyHit")) {
-                // check distance horizontal
-                Vector3 hitPoint = hitInfo.point;
-                hitPoint.y = transform.position.y;
-                float distance = Vector3.Distance(hitPoint, transform.position);
-
-                if (distance < attackRange) {
-                    // attack
-                    attackTarget = hitInfo.collider.transform;
-                    ChangeState(State.Attacking);
-                }else{
-                    SendMessage("SetDestination", hitInfo.point);
-                }
-            }
-        }
+        }else{
+			if(characterMove.Arrived())
+				waitTime = Random.Range(waitBasetime, waitBasetime * 2.0f);
+		}
     }
 
     void AttackStart() {

@@ -33,6 +33,9 @@ public class InputManager : MonoBehaviour {
 			delta = GetCursorPosition() - prevPosition;
 		else
 			delta = Vector2.zero;
+
+		// カーソル位置を更新.      
+		prevPosition = GetCursorPosition();
 	}
 
 	public bool Clicked()

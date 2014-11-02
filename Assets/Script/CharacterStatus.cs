@@ -3,29 +3,29 @@ using System.Collections;
 
 public class CharacterStatus : MonoBehaviour {
 
-	public int HP = 100;
-	public int MaxHp = 100;
+  public int HP = 100;
+  public int MaxHp = 100;
 
-	public int Power = 10;
+  public int Power = 10;
 
-	public GameObject lastAttackTarget = null;
+  public GameObject lastAttackTarget = null;
 
-	// GUI お及びネットワーク
-	// 名前
-	public string CharacterName = "Player";
+  // GUI お及びネットワーク
+  // 名前
+  public string CharacterName = "Player";
 
-	// アニメーション
-	// 状態
-	public bool attcking = false;
-	public bool died = false;
+  // アニメーション
+  // 状態
+  public bool attacking = false;
+  public bool died = false;
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+  // Use this for initialization
+  void Start () {
+
+  }
+
+  // Update is called once per frame
+  void Update () {
+
+  }
 }
